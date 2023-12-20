@@ -9,7 +9,7 @@ services:
     networks:
       - management-network 
     volumes:
-      - grafana-volume:/var/lib/grafana
+      - ./data/podman-vol/grafana:/var/lib/grafana
 
   influxdb:
     image: docker.io/influxdb
@@ -21,7 +21,7 @@ services:
     networks:
       - management-network 
     volumes:
-      - influxdb-volume:/var/lib/influxdb
+      - ./data/podman-vol/influxdb:/var/lib/influxdb
 
   organizr:
     image: docker.io/organizr/organizr
@@ -35,7 +35,7 @@ services:
       - fpm=true # optional, remove this line if not needed
       - branch=v2-master  # optional, remove this line if not needed
     volumes:
-      - organizr-volume:/config
+      - ./data/podman-vol/organizr:/config
 
   docker_registry_web:
     image: docker.io/hyper/docker-registry-web
@@ -53,7 +53,7 @@ services:
     volumes:
       - ./conf/registry-web.yml:/conf/config.yml:ro
       - ./conf/auth.key:/conf/auth.key
-      - registry-web-volume:/data
+      - ./data/podman-vol/registry-web:/data
 
   registry-srv:
     image: docker.io/registry
@@ -67,13 +67,3 @@ services:
 
 networks:
   management-network:
-
-volumes:
-  grafana-volume:
-    - ./data/podman-vol/grafana
-  influxdb-volume:
-    - ./data/podman-vol/influxdb
-  organizr-volume:
-    - ./data/podman-vol/organizr
-  registry-web-volume:
-    - ./data/podman-vol/registry-web
