@@ -1,0 +1,77 @@
+version: "3"
+services:
+  grafana:
+    image: docker.io/grafana/grafana
+    container_name: grafana
+    restart: always
+    ports:
+      - 3000:3000
+    networks:
+      - monitoring_network
+    volumes:
+      - grafana-volume:/var/lib/grafana
+  influxdb:
+    image: docker.io/influxdb
+    container_name: influxdb
+    restart: always
+    ports:
+      - 8086:8086
+      - 8089:8089/udp
+    networks:
+      - monitoring_network
+    volumes:
+      - influxdb-volume:/var/lib/influxdb
+  organizr:
+    image: docker.io/organizr/organizr
+    container_name: organizr
+    restart: always
+    ports:
+      - 80:80
+    environment:
+      - PGID=1001
+      - PUID=1001
+      - fpm=true # optional, remove this line if not needed
+      - branch=v2-master  # optional, remove this line if not needed
+    volumes:
+      - organizr-volume:/config
+  docker_registry_web:
+    image: docker.io/hyper/docker-registry-web
+    container_name: registry-web
+    restart: always
+    links:
+      - registry-srv
+    ports:
+      - 8080:8080
+    environment:
+      - REGISTRY_URL=https://registry-srv:5000/v2
+      - REGISTRY_TRUST_ANY_SSL=true
+      - REGISTRY_BASIC_AUTH="YWRtaW46Y2hhbmdlbWU="
+      - REGISTRY_NAME=localhost:5000 hyper/docker-registry-web
+    volumes:
+      - $(pwd)/conf/registry-web.yml:/conf/config.yml:ro
+      - $(pwd)/conf/auth.key:/conf/auth.key -v $(pwd)/db:/data
+  registry-srv:
+    image: docker.io/registry
+    container_name: registry-srv
+    restart: always
+    ports:
+      - 5000:5000
+    volumes:
+      - $(pwd)/conf/registry-srv.yml:/etc/docker/registry/config.yml:ro
+      -v $(pwd)/conf/auth.cert:/etc/docker/registry/auth.cert:ro
+
+
+networks:
+  monitoring_network:
+
+volumes:
+  grafana-volume:
+    - /home/management/podman-vol/grafana
+  influxdb-volume:
+    - /home/management/podman-vol/influxdb
+  organizr-volume:
+    - /home/management/podman-vol/organizr
+  registry-volume:
+    - /home/management/podman-vol/registry-srv
+  registry-web-volume:
+    - /home/management/podman-vol/registry-web
