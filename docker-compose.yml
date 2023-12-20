@@ -9,7 +9,7 @@ services:
     networks:
       - management-network 
     volumes:
-      - ./data/podman-vol/grafana:/var/lib/grafana
+      - grafana-data:/var/lib/grafana
 
   influxdb:
     image: docker.io/influxdb
@@ -20,8 +20,8 @@ services:
       - 8089:8089/udp
     networks:
       - management-network 
-      volumes:
-      - ./data/podman-vol/influxdb:/var/lib/influxdb
+    volumes:
+      - influxdb-data:/var/lib/influxdb
 
   organizr:
     image: docker.io/organizr/organizr
@@ -35,7 +35,7 @@ services:
       - fpm=true # optional, remove this line if not needed
       - branch=v2-master  # optional, remove this line if not needed
     volumes:
-      - ./data/podman-vol/organizr:/config
+      - organizr-data:/config
 
   docker_registry_web:
     image: docker.io/hyper/docker-registry-web
@@ -51,9 +51,7 @@ services:
       - REGISTRY_BASIC_AUTH="YWRtaW46Y2hhbmdlbWU="
       - REGISTRY_NAME=localhost:5000 hyper/docker-registry-web
     volumes:
-      - ./conf/registry-web.yml:/conf/config.yml:ro
-      - ./conf/auth.key:/conf/auth.key
-      - ./data/podman-vol/registry-web:/data
+      - registry-web-data:/data
 
   registry-srv:
     image: docker.io/registry
@@ -62,8 +60,22 @@ services:
     ports:
       - 5000:5000
     volumes:
-      - ./conf/registry-srv.yml:/etc/docker/registry/config.yml:ro
-      - ./conf/auth.cert:/etc/docker/registry/auth.cert:ro
+      - registry-srv-data:/etc/docker/registry
+      - registry-srv-auth:/etc/docker/registry/auth
 
 networks:
   management-network:
+
+volumes:
+  grafana-data:
+    external: true
+  influxdb-data:
+    external: true
+  organizr-data:
+    external: true
+  registry-web-data:
+    external: true
+  registry-srv-data:
+    external: true
+  registry-srv-auth:
+    external: true
