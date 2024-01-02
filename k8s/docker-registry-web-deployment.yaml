@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.0 (40646f47)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: docker-registry-web
+  name: docker-registry-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: docker-registry-web
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.26.0 (40646f47)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: docker-registry-web
+    spec:
+      containers:
+        - env:
+            - name: REGISTRY_BASIC_AUTH
+              value: '"YWRtaW46Y2hhbmdlbWU="'
+            - name: REGISTRY_NAME
+              value: localhost:5000 hyper/docker-registry-web
+            - name: REGISTRY_TRUST_ANY_SSL
+              value: "true"
+            - name: REGISTRY_URL
+              value: https://registry-srv:5000/v2
+          image: docker.io/hyper/docker-registry-web
+          name: registry-web
+          ports:
+            - containerPort: 8080
+          resources: {}
+          volumeMounts:
+            - mountPath: /data
+              name: registry-web-data
+      restartPolicy: Always
+      volumes:
+        - name: registry-web-data
+          persistentVolumeClaim:
+            claimName: registry-web-data
+status: {}

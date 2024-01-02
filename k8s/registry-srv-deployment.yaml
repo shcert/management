@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.0 (40646f47)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: registry-srv
+  name: registry-srv
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: registry-srv
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.26.0 (40646f47)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: registry-srv
+    spec:
+      containers:
+        - image: docker.io/registry
+          name: registry-srv
+          ports:
+            - containerPort: 5000
+          resources: {}
+          volumeMounts:
+            - mountPath: /etc/docker/registry
+              name: registry-srv-data
+            - mountPath: /etc/docker/registry/auth
+              name: registry-srv-auth
+      restartPolicy: Always
+      volumes:
+        - name: registry-srv-data
+          persistentVolumeClaim:
+            claimName: registry-srv-data
+        - name: registry-srv-auth
+          persistentVolumeClaim:
+            claimName: registry-srv-auth
+status: {}

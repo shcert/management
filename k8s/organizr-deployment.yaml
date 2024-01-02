@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.0 (40646f47)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: organizr
+  name: organizr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: organizr
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.26.0 (40646f47)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: organizr
+    spec:
+      containers:
+        - env:
+            - name: PGID
+              value: "1001"
+            - name: PUID
+              value: "1001"
+            - name: branch
+              value: v2-master
+            - name: fpm
+              value: "true"
+          image: docker.io/organizr/organizr
+          name: organizr
+          ports:
+            - containerPort: 80
+          resources: {}
+          volumeMounts:
+            - mountPath: /config
+              name: organizr-data
+      restartPolicy: Always
+      volumes:
+        - name: organizr-data
+          persistentVolumeClaim:
+            claimName: organizr-data
+status: {}
